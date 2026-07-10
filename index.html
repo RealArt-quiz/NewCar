@@ -1,1 +1,61 @@
-<!DOCTYPE html><html lang='da'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Bilportal Danmark V3</title><style>body{font-family:Arial;margin:0;background:#f3f6fa}header{background:#123;color:#fff;padding:20px;text-align:center}.wrap{max-width:1300px;margin:auto;padding:20px}.panel{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.1)}.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px}input,select{width:100%;padding:10px}.btn{background:#0a66ff;color:#fff;border:0;padding:14px;border-radius:8px;margin-top:15px}.car{background:#eefcff;padding:15px;border-radius:10px;margin:10px 0}@media(max-width:900px){.grid{grid-template-columns:1fr}}</style></head><body><header><h1>🚗 Bilportal Danmark V3</h1><p>Offline bilrådgiver med stor database</p></header><div class='wrap'><div class='panel'><div class='grid'><div><label>Årligt km</label><input id='km' type='number' value='20000'><label>Budget</label><input id='budget' type='number' value='400000'><label>Maks månedlig ydelse</label><input id='month' type='number' value='5000'></div><div><label>Drivlinje</label><select id='fuel'><option>Alle</option><option>Elbil</option><option>Benzin</option><option>Diesel</option><option>Hybrid</option></select><label>Personer</label><select id='seats'><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select><label>Trækbehov</label><select id='tow'><option>Ingen</option><option>Trailer</option><option>Campingvogn</option></select></div><div><label>Anskaffelse</label><select id='mode'><option>Køb</option><option>Leasing</option></select><label>Hjemmelader</label><select id='charger'><option>Ja</option><option>Nej</option></select><button class='btn' onclick='run()'>Find biler</button></div></div><div id='out'></div></div></div><script>const cars=[['Tesla','Model Y',339990,'Elbil',5,1600],['Tesla','Model 3',299990,'Elbil',5,1000],['Skoda','Elroq',279995,'Elbil',5,1200],['Skoda','Enyaq',349995,'Elbil',5,1200],['VW','ID.3',269995,'Elbil',5,1000],['VW','ID.4',329995,'Elbil',5,1400],['Audi','Q4 e-tron',399995,'Elbil',5,1200],['BMW','iX1',429995,'Elbil',5,1200],['Mercedes','EQB',449995,'Elbil',7,1400],['Kia','EV3',269999,'Elbil',5,1000],['Kia','EV6',369999,'Elbil',5,1800],['Hyundai','IONIQ 5',349995,'Elbil',5,1600],['Volvo','EX30',279999,'Elbil',5,1000],['Polestar','2',339999,'Elbil',5,1500],['Toyota','Corolla',319990,'Hybrid',5,1300],['Toyota','RAV4',419990,'Hybrid',5,1500],['Ford','Kuga',359990,'Hybrid',5,1500],['Peugeot','5008',389990,'Benzin',7,1500],['Skoda','Octavia',299995,'Diesel',5,1800],['VW','Touran',420000,'Diesel',7,1800],['Dacia','Jogger',249990,'Benzin',7,1200],['BYD','Seal',329990,'Elbil',5,1500],['XPENG','G6',349990,'Elbil',5,1500],['Renault','Scenic E-Tech',309990,'Elbil',5,1100],['MG','ZS EV',239990,'Elbil',5,750]];function score(c){let s=0;let km=+document.getElementById('km').value; if(c[3]=='Elbil'&&km<40000)s+=40; if(c[3]=='Diesel'&&km>40000)s+=40; if(c[4]>=+seats.value)s+=20; if(c[2]<=+budget.value)s+=20; if(tow.value=='Campingvogn'&&c[5]>=1500)s+=30; return s;} function run(){let r=cars.filter(c=>c[2]<=+budget.value&&c[4]>=+seats.value); if(fuel.value!='Alle')r=r.filter(c=>c[3]==fuel.value); r.sort((a,b)=>score(b)-score(a)); let h='<h2>Top anbefalinger</h2>'; r.slice(0,10).forEach(c=>h+=`<div class='car'><h3>${c[0]} ${c[1]}</h3><p>Pris: ${c[2].toLocaleString('da-DK')} kr</p><p>Type: ${c[3]}</p><p>Pladser: ${c[4]}</p><p>Træk: ${c[5]} kg</p></div>`); out.innerHTML=h;}</script></body></html>
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BilPortal Danmark V7 Ultimate</title>
+<style>
+body{font-family:Segoe UI,sans-serif;background:#f4f7fb;margin:0}
+header{background:#0f172a;color:#fff;padding:20px;text-align:center}
+.main{max-width:1400px;margin:auto;padding:20px}
+.card{background:#fff;padding:20px;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+input,select{width:100%;padding:10px}
+button{background:#2563eb;color:#fff;border:0;padding:12px 18px;border-radius:8px;cursor:pointer}
+.car{background:#ecfeff;border-radius:12px;padding:15px;margin-top:12px}
+.links a{margin-right:8px}
+.score{color:green;font-weight:bold}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><h1>🚗 BilPortal Danmark V7 Ultimate</h1></header>
+<div class="main"><div class="card">
+<div class="grid">
+<div>
+<label>Pendling km/dag: <span id="pv">30</span></label>
+<input type="range" id="pend" min="0" max="200" value="30" oninput="pv.innerText=this.value">
+<label>Årlige km: <span id="yv">20000</span></label>
+<input type="range" id="year" min="0" max="100000" step="1000" value="20000" oninput="yv.innerText=this.value">
+</div>
+<div>
+<label>Budget</label><input id="budget" type="number" value="450000">
+<label>Månedligt budget</label><input id="monthly" type="number" value="5000">
+</div>
+<div>
+<label>Anskaffelse</label><select id="mode"><option>Køb</option><option>Leasing</option></select>
+<label>Drivlinje</label><select id="fuel"><option>Ligegyldig</option><option>Elbil</option><option>Hybrid</option><option>Benzin</option><option>Diesel</option></select>
+</div>
+<div>
+<label>Trækbehov</label><select id="tow"><option>Ingen</option><option>Trailer</option><option>Campingvogn</option></select>
+<label>Personer</label><select id="people"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select>
+</div>
+</div>
+<br><button onclick="findCars()">Find bedste biler</button>
+<div id="results"></div>
+</div></div>
+<script>
+const cars=[
+{b:'Tesla',m:'Model Y',t:'Elbil',p:339990,l:3999,r:622,bag:854,s:5,tow:1600,u:'https://www.tesla.com/da_dk/modely'},
+{b:'Tesla',m:'Model 3',t:'Elbil',p:299990,l:3499,r:700,bag:594,s:5,tow:1000,u:'https://www.tesla.com/da_dk/model3'},
+{b:'Skoda',m:'Elroq',t:'Elbil',p:279995,l:3299,r:560,bag:470,s:5,tow:1200,u:'https://www.skoda.dk'},
+{b:'Skoda',m:'Enyaq',t:'Elbil',p:349995,l:3899,r:580,bag:585,s:5,tow:1200,u:'https://www.skoda.dk'},
+{b:'VW',m:'ID.4',t:'Elbil',p:329995,l:3699,r:550,bag:543,s:5,tow:1400,u:'https://www.volkswagen.dk'},
+{b:'Kia',m:'EV3',t:'Elbil',p:269999,l:3199,r:600,bag:460,s:5,tow:1000,u:'https://www.kia.com/dk'},
+{b:'Toyota',m:'Corolla Hybrid',t:'Hybrid',p:319990,l:3299,r:900,bag:581,s:5,tow:1300,u:'https://www.toyota.dk'},
+{b:'Peugeot',m:'5008',t:'Benzin',p:389990,l:4299,r:800,bag:780,s:7,tow:1500,u:'https://www.peugeot.dk'},
+{b:'Skoda',m:'Octavia Diesel',t:'Diesel',p:299995,l:3299,r:1100,bag:640,s:5,tow:1800,u:'https://www.skoda.dk'}];
+function score(c){let s=50;let km=+year.value;if(c.t==='Elbil'&&km<40000)s+=20;if(c.t==='Diesel'&&km>40000)s+=20;if(tow.value==='Campingvogn'&&c.tow>=1500)s+=15;if(c.s>=+people.value)s+=10;return s;}
+function findCars(){let arr=cars.filter(c=>c.p<=+budget.value&&c.s>=+people.value);if(fuel.value!=='Ligegyldig')arr=arr.filter(c=>c.t===fuel.value);arr.sort((a,b)=>score(b)-score(a));results.innerHTML='<h2>Top anbefalinger</h2>'+arr.map((c,i)=>`<div class="car"><h3>#${i+1} ${c.b} ${c.m}</h3><p><b>Pris:</b> ${c.p.toLocaleString('da-DK')} kr.</p><p><b>Leasing:</b> ${c.l} kr./md.</p><p><b>Rækkevidde:</b> ${c.r} km</p><p><b>Bagagerum:</b> ${c.bag} liter</p><p><b>Træk:</b> ${c.tow} kg</p><p class="score">Matchscore: ${score(c)}/100</p><div class="links"><a target="_blank" href="${c.u}">🌐 Officiel hjemmeside</a> <a target="_blank" href="https://fdm.dk/tests">🧪 FDM test</a> <a target="_blank" href="https://bilmagasinet.dk">📰 Bil Magasinet</a></div></div>`).join('');}
+</script>
+</body></html>

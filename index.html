@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bilkøb i Danmark</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f5f7fa;max-width:1000px;margin:auto;padding:20px}
+.card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+label{display:block;margin-top:15px;font-weight:bold}
+input[type=range]{width:100%}
+button{background:#0066ff;color:#fff;border:none;padding:15px 30px;border-radius:8px;cursor:pointer}
+.result{margin-top:20px;padding:20px;background:#e8fff1;border-radius:12px}
+</style>
+</head>
+<body>
+<h1>🚗 Bilkøb i Danmark</h1>
+<div class="card">
+<label>Antal km til job pr. dag: <span id="jobValue">20</span> km</label>
+<input type="range" id="jobKm" min="0" max="200" value="20">
+<label>Årligt kørselsbehov: <span id="yearValue">15000</span> km</label>
+<input type="range" id="yearKm" min="0" max="100000" step="1000" value="15000">
+<label>Anskaffelsesmetode</label><select id="anskaffelse"><option>Køb</option><option>Leasing</option></select>
+<label>Budget (kr.)</label><input type="number" id="budget" value="350000">
+<label>Biltype</label><select id="biltype"><option>Elbil</option><option>Benzin</option><option>Diesel</option><option>Ligegyldig</option></select>
+<label>Skal kunne trække</label><select id="traek"><option>Ingen</option><option>Trailer</option><option>Campingvogn</option></select>
+<label>Personer inkl. bagage</label><select id="personer"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select>
+<br><br><button onclick="findBil()">Find anbefalet bil</button>
+<div id="resultat"></div>
+</div>
+<script>
+jobKm.oninput=()=>jobValue.innerHTML=jobKm.value;
+yearKm.oninput=()=>yearValue.innerHTML=yearKm.value;
+const biler=[
+{mærke:'Skoda',model:'Elroq',pris:279995,type:'Elbil',træk:'Trailer',personer:5,link:'https://www.skoda.dk'},
+{mærke:'Tesla',model:'Model Y',pris:339990,type:'Elbil',træk:'Campingvogn',personer:5,link:'https://www.tesla.com/da_dk/modely'},
+{mærke:'Volkswagen',model:'ID.4',pris:329995,type:'Elbil',træk:'Campingvogn',personer:5,link:'https://www.volkswagen.dk'},
+{mærke:'Toyota',model:'Corolla Touring Sports',pris:319990,type:'Benzin',træk:'Trailer',personer:5,link:'https://www.toyota.dk'},
+{mærke:'Skoda',model:'Octavia Combi',pris:299995,type:'Diesel',træk:'Campingvogn',personer:5,link:'https://www.skoda.dk'},
+{mærke:'Peugeot',model:'5008',pris:389990,type:'Benzin',træk:'Campingvogn',personer:7,link:'https://www.peugeot.dk'}];
+function findBil(){let budget=parseInt(budget.value||0);let type=biltype.value;let personerVal=parseInt(personer.value);let traekVal=traek.value;let km=parseInt(yearKm.value);let kandidat=biler.filter(b=>b.pris<=budget&&personerVal<=b.personer&&(type==='Ligegyldig'||b.type===type));if(traekVal==='Campingvogn'){kandidat=kandidat.filter(b=>b.træk==='Campingvogn');}if(!kandidat.length){resultat.innerHTML='<div class="result">Ingen bil fundet indenfor budget.</div>';return;}let valg=kandidat[0];if(km>30000&&type==='Ligegyldig'){let diesel=kandidat.find(b=>b.type==='Diesel');if(diesel)valg=diesel;}resultat.innerHTML=`<div class="result"><h2>Anbefalet bil</h2><p><b>Mærke:</b> ${valg.mærke}</p><p><b>Model:</b> ${valg.model}</p><p><b>Pris:</b> ${valg.pris.toLocaleString('da-DK')} kr.</p><p><a href="${valg.link}" target="_blank">Se bilen</a></p></div>`;}
+</script>
+</body>
+</html>

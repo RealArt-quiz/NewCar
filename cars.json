@@ -1,1 +1,13 @@
-[{"brand":"Tesla","model":"Model Y","fuel":"Elbil","price":339990},{"brand":"Mercedes-Benz","model":"EQA","fuel":"Elbil","price":399990},{"brand":"Porsche","model":"Macan Electric","fuel":"Elbil","price":679900},{"brand":"Citroen","model":"C5 Aircross","fuel":"Benzin","price":369990}]
+[
+{"brand":"Tesla","model":"Model 3","fuel":"Elbil","body":"Sedan","price":299990,"lease":3999,"range":700,"battery":75,"charging":250,"boot":594,"tow":1000,"seats":5,"homepage":"https://www.tesla.com"},
+{"brand":"Tesla","model":"Model Y","fuel":"Elbil","body":"SUV","price":339990,"lease":4299,"range":622,"battery":75,"charging":250,"boot":854,"tow":1600,"seats":5,"homepage":"https://www.tesla.com"},
+{"brand":"Volkswagen","model":"ID.4","fuel":"Elbil","body":"SUV","price":329995,"lease":3999,"range":550,"battery":77,"charging":175,"boot":543,"tow":1400,"seats":5,"homepage":"https://www.volkswagen.dk"},
+{"brand":"Skoda","model":"Enyaq","fuel":"Elbil","body":"SUV","price":349995,"lease":4499,"range":580,"battery":82,"charging":175,"boot":585,"tow":1200,"seats":5,"homepage":"https://www.skoda.dk"},
+{"brand":"Renault","model":"Scenic E-Tech","fuel":"Elbil","body":"SUV","price":329990,"lease":4299,"range":620,"battery":87,"charging":150,"boot":545,"tow":1100,"seats":5,"homepage":"https://www.renault.dk"},
+{"brand":"Peugeot","model":"e-3008","fuel":"Elbil","body":"SUV","price":369990,"lease":4699,"range":525,"battery":73,"charging":160,"boot":520,"tow":1250,"seats":5,"homepage":"https://www.peugeot.dk"},
+{"brand":"Citroen","model":"C5 Aircross","fuel":"Benzin","body":"SUV","price":369990,"lease":3999,"range":800,"battery":0,"charging":0,"boot":580,"tow":1400,"seats":5,"homepage":"https://www.citroen.dk"},
+{"brand":"Toyota","model":"RAV4 Hybrid","fuel":"Hybrid","body":"SUV","price":419990,"lease":5299,"range":900,"battery":0,"charging":0,"boot":580,"tow":1500,"seats":5,"homepage":"https://www.toyota.dk"},
+{"brand":"Mercedes-Benz","model":"EQA","fuel":"Elbil","body":"SUV","price":399990,"lease":5499,"range":560,"battery":70,"charging":100,"boot":340,"tow":1500,"seats":5,"homepage":"https://www.mercedes-benz.dk"},
+{"brand":"BMW","model":"i4","fuel":"Elbil","body":"Sedan","price":449995,"lease":5999,"range":590,"battery":81,"charging":205,"boot":470,"tow":1600,"seats":5,"homepage":"https://www.bmw.dk"},
+{"brand":"Porsche","model":"Macan Electric","fuel":"Elbil","body":"SUV","price":679900,"lease":8999,"range":613,"battery":95,"charging":270,"boot":540,"tow":2000,"seats":5,"homepage":"https://www.porsche.com"}
+]

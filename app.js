@@ -1,125 +1,32 @@
-let cars = [];
+function hardFilterCars(cars,user){
+ return cars.filter(car=>{
+   if(user.method==='buy' && user.budget>0 && car.price>user.budget) return false;
+   if(user.method==='lease' && user.leaseBudget>0 && car.lease>user.leaseBudget) return false;
 
-fetch('cars.json')
-  .then(r => r.json())
-  .then(data => {
-    cars = data;
-  });
+   if(user.fuel && car.fuel!==user.fuel) return false;
 
-const commute = document.getElementById('commute');
-const yearlyKm = document.getElementById('yearlyKm');
+   if(car.seats < user.people) return false;
 
-if (commute) {
-  commute.addEventListener('input', () => {
-    document.getElementById('commuteValue').textContent = commute.value + ' km';
-  });
+   if(user.baggage==='høj' && car.boot < 500) return false;
+   if(user.baggage==='mellem' && car.boot < 400) return false;
+
+   if(user.towNeed==='campingvogn' && car.tow < 1200) return false;
+   if(user.towNeed==='trailer' && car.tow < 750) return false;
+
+   return true;
+ });
 }
 
-if (yearlyKm) {
-  yearlyKm.addEventListener('input', () => {
-    document.getElementById('yearlyKmValue').textContent = Number(yearlyKm.value).toLocaleString('da-DK') + ' km';
-  });
+function calculateMatch(car,user){
+ let score=0;
+ let reasons=[];
+
+ score+=50; reasons.push('✅ Matcher de vigtigste krav');
+
+ if(car.range>=500){score+=10; reasons.push('✅ God rækkevidde');}
+ if(car.boot>=500){score+=10; reasons.push('✅ God bagageplads');}
+ if(car.tow>=1200 && user.towNeed!=='ingen'){score+=10; reasons.push('✅ Opfylder trækbehov');}
+ if(car.price<=(user.budget||9999999)){score+=10; reasons.push('✅ Indenfor budget');}
+
+ return {score:Math.min(score,100),reasons};
 }
-
-function getUserProfile() {
-  return {
-    method: document.querySelector('input[name="method"]:checked')?.value || 'buy',
-    budget: Number(document.getElementById('budget')?.value || 0),
-    leaseBudget: Number(document.getElementById('leaseBudget')?.value || 0),
-    fuel: document.getElementById('fuel')?.value,
-    towNeed: document.getElementById('towNeed')?.value,
-    people: Number(document.getElementById('people')?.value || 1),
-    baggage: document.getElementById('baggage')?.value,
-    yearlyKm: Number(document.getElementById('yearlyKm')?.value || 0),
-    commute: Number(document.getElementById('commute')?.value || 0)
-  };
-}
-
-function calculateMatch(car, user) {
-  let score = 0;
-  const reasons = [];
-
-  if (user.method === 'buy' && user.budget > 0) {
-    if (car.price <= user.budget) {
-      score += 40;
-      reasons.push('✅ Passer til dit budget');
-    }
-  }
-
-  if (user.method === 'lease' && user.leaseBudget > 0) {
-    if ((car.lease || 999999) <= user.leaseBudget) {
-      score += 40;
-      reasons.push('✅ Passer til dit leasingbudget');
-    }
-  }
-
-  if (car.fuel === user.fuel) {
-    score += 10;
-    reasons.push('✅ Matcher ønsket drivlinje');
-  }
-
-  if ((car.seats || 0) >= user.people) {
-    score += 15;
-    reasons.push('✅ Plads til familien');
-  }
-
-  if (user.baggage === 'høj' && (car.boot || 0) >= 500) {
-    score += 15;
-    reasons.push('✅ God bagageplads');
-  }
-
-  if (user.towNeed === 'campingvogn' && (car.tow || 0) >= 1200) {
-    score += 20;
-    reasons.push('✅ Kan trække campingvogn');
-  }
-
-  if (user.towNeed === 'trailer' && (car.tow || 0) >= 750) {
-    score += 10;
-    reasons.push('✅ Kan trække trailer');
-  }
-
-  return { score, reasons };
-}
-
-function findCars() {
-  const user = getUserProfile();
-
-  const results = cars
-    .map(car => {
-      const match = calculateMatch(car, user);
-      return {
-        ...car,
-        matchScore: match.score,
-        reasons: match.reasons
-      };
-    })
-    .sort((a, b) => b.matchScore - a.matchScore)
-    .slice(0, 10);
-
-  renderResults(results);
-}
-
-function renderResults(results) {
-  const container = document.getElementById('resultsContainer');
-
-  container.innerHTML = results.map(car => `
-    <div class="result-card">
-      <h3>${car.brand} ${car.model}</h3>
-      <div class="score">${car.matchScore}% match</div>
-
-      <p>${car.reasons.join('<br>')}</p>
-
-      <p><strong>Pris:</strong> ${Number(car.price).toLocaleString('da-DK')} kr.</p>
-      <p><strong>Rækkevidde:</strong> ${car.range || '-'} km</p>
-      <p><strong>Træk:</strong> ${car.tow || '-'} kg</p>
-
-      <p>
-        <a target="_blank" href="${car.homepage}">Producent</a> |
-        <a target="_blank" href="https://www.google.com/search?q=${encodeURIComponent(car.brand + ' ' + car.model + ' FDM test')}">FDM Test</a> |
-        <a target="_blank" href="https://www.google.com/search?q=${encodeURIComponent(car.brand + ' ' + car.model + ' Bil Magasinet test')}">Bil Magasinet</a>
-      </p>
-    </div>
-  `).join('');
-}
-
-document.getElementById('findCarBtn')?.addEventListener('click', findCars);

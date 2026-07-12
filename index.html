@@ -1,1 +1,105 @@
-<!DOCTYPE html><html lang="da"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>BilPortal Danmark V14 Base</title><link rel="stylesheet" href="style.css"></head><body><header class="topbar"><h1>🚗 BilPortal Danmark</h1><div class="top-actions"><button id="darkModeBtn">🌙 Dark Mode</button><button id="showFavoritesBtn">❤️ Favoritter</button><button id="showCompareBtn">⚖️ Sammenligning</button></div></header><main class="layout"><aside class="sidebar"><h2>Filtre</h2><section><h3>💰 Økonomi</h3><label>Pris fra</label><input type="number" id="priceMin"><label>Pris til</label><input type="number" id="priceMax"><label>Leasing fra</label><input type="number" id="leaseMin"><label>Leasing til</label><input type="number" id="leaseMax"></section><section><h3>🚗 Kørsel</h3><label>Km pr. år</label><input type="number" id="kmPerYear"><label>Pendling km/dag</label><input type="number" id="commuteKm"></section><section><h3>👨‍👩‍👧 Familie</h3><label>Personer</label><select id="people"><option value="">Alle</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select><label>Børn</label><input type="number" id="children" min="0"><label><input type="checkbox" id="dog"> Hund</label></section><section><h3>🔋 Elbil</h3><label><input type="checkbox" id="homeCharger"> Hjemmelader</label></section><section><h3>⚙️ Teknik</h3><label>Min. rækkevidde</label><input type="number" id="rangeMin"><label>Min. bagagerum</label><input type="number" id="bootMin"><label>Min. trækkapacitet</label><input type="number" id="towMin"></section><button id="findCarsBtn">🚗 Find min bil</button></aside><section class="results"><h2>Anbefalede biler</h2><div id="resultsContainer"></div></section><aside class="right-panel"><div class="panel-box"><h2>❤️ Favoritter</h2><div id="favoritesList">Ingen favoritter endnu</div></div><div class="panel-box"><h2>⚖️ Sammenligning</h2><div id="compareList">Ingen biler valgt</div></div></aside></main><script src="app.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bilrådgiver Danmark</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <h1>🚗 Bilrådgiver Danmark</h1>
+    <p>Svar på spørgsmålene og få de bedste bilanbefalinger.</p>
+</header>
+
+<main class="container">
+
+<section class="question-card">
+    <h2>📍 Kørsel</h2>
+
+    <label for="commute">Kilometer til arbejde pr. dag</label>
+    <input type="range" id="commute" min="0" max="200" value="25">
+    <span id="commuteValue">25 km</span>
+
+    <label for="yearlyKm">Kilometer pr. år</label>
+    <input type="range" id="yearlyKm" min="0" max="100000" step="1000" value="20000">
+    <span id="yearlyKmValue">20.000 km</span>
+</section>
+
+<section class="question-card">
+    <h2>💰 Økonomi</h2>
+
+    <label>
+        <input type="radio" name="method" value="buy" checked>
+        Køb
+    </label>
+
+    <label>
+        <input type="radio" name="method" value="lease">
+        Leasing
+    </label>
+
+    <div id="buySection">
+        <label>Budget (kr.)</label>
+        <input type="number" id="budget" placeholder="400000">
+    </div>
+
+    <div id="leaseSection">
+        <label>Maks. leasing pr. måned</label>
+        <input type="number" id="leaseBudget" placeholder="5000">
+    </div>
+</section>
+
+<section class="question-card">
+    <h2>⚡ Drivlinje</h2>
+
+    <select id="fuel">
+        <option value="Elbil">Elbil</option>
+        <option value="Hybrid">Hybrid</option>
+        <option value="Benzin">Benzin</option>
+        <option value="Diesel">Diesel</option>
+    </select>
+</section>
+
+<section class="question-card">
+    <h2>🚚 Trækbehov</h2>
+
+    <select id="towNeed">
+        <option value="ingen">Intet behov</option>
+        <option value="trailer">Trailer</option>
+        <option value="campingvogn">Campingvogn</option>
+    </select>
+</section>
+
+<section class="question-card">
+    <h2>👨‍👩‍👧‍👦 Familie</h2>
+
+    <label>Antal personer</label>
+    <input type="number" id="people" min="1" max="9" value="4">
+
+    <label>Bagagebehov</label>
+    <select id="baggage">
+        <option value="lav">Lav</option>
+        <option value="mellem">Mellem</option>
+        <option value="høj">Høj</option>
+    </select>
+</section>
+
+<section class="question-card center">
+    <button id="findCarBtn">
+        🚗 Find min bil
+    </button>
+</section>
+
+<section class="results-card">
+    <h2>🏆 Dine anbefalinger</h2>
+    <div id="resultsContainer">
+        Resultater vises her...
+    </div>
+</section>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

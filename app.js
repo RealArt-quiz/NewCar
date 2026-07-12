@@ -1,82 +1,125 @@
-let cars=[];
-let favorites=JSON.parse(localStorage.getItem('favorites')||'[]');
-let compareList=[];
+let cars = [];
 
 fetch('cars.json')
- .then(r=>r.json())
- .then(data=>{
-   cars=data;
-   renderCars(data);
-   renderFavorites();
- });
+  .then(r => r.json())
+  .then(data => {
+    cars = data;
+  });
 
-function calculateScore(car){
- let score=50;
- if(car.range>=500) score+=15;
- if(car.tow>=1500) score+=10;
- if(car.boot>=500) score+=10;
- if(car.seats>=5) score+=5;
- return Math.min(score,100);
+const commute = document.getElementById('commute');
+const yearlyKm = document.getElementById('yearlyKm');
+
+if (commute) {
+  commute.addEventListener('input', () => {
+    document.getElementById('commuteValue').textContent = commute.value + ' km';
+  });
 }
 
-function buildReasons(car){
- const reasons=[];
- if(car.range>=500) reasons.push('✅ Høj rækkevidde');
- if(car.boot>=500) reasons.push('✅ God bagageplads');
- if(car.tow>=1500) reasons.push('✅ Velegnet til trailer/campingvogn');
- if(car.seats>=5) reasons.push('✅ God familiebil');
- return reasons.join('<br>');
+if (yearlyKm) {
+  yearlyKm.addEventListener('input', () => {
+    document.getElementById('yearlyKmValue').textContent = Number(yearlyKm.value).toLocaleString('da-DK') + ' km';
+  });
 }
 
-function renderCars(list){
- const container=document.getElementById('resultsContainer');
- container.innerHTML=list.map(car=>{
- const score=calculateScore(car);
- const scoreClass=score>=90?'score-green':score>=70?'score-yellow':'score-red';
- return `
- <div class="car-card">
- <h2>${car.brand} ${car.model}</h2>
- <div class="match-score ${scoreClass}">${score}/100</div>
- <div class="reasons">${buildReasons(car)}</div>
- <div class="spec-grid">
- <div class="spec">Pris: ${car.price?.toLocaleString('da-DK')} kr.</div>
- <div class="spec">Leasing: ${car.lease||'-'} kr./md.</div>
- <div class="spec">Rækkevidde: ${car.range||'-'} km</div>
- <div class="spec">Bagagerum: ${car.boot||'-'} L</div>
- <div class="spec">Træk: ${car.tow||'-'} kg</div>
- <div class="spec">Sæder: ${car.seats||'-'}</div>
- </div>
- <div class="actions">
- <button onclick="addFavorite('${car.brand} ${car.model}')">❤️ Favorit</button>
- <button onclick="addCompare('${car.brand} ${car.model}')">⚖️ Sammenlign</button>
- </div>
- <div class="car-links">
- <a target="_blank" href="${car.homepage||'#'}">🌐 Producent</a>
- <a target="_blank" href="https://www.google.com/search?q=${encodeURIComponent(car.brand+' '+car.model+' FDM test')}">🧪 FDM</a>
- <a target="_blank" href="https://www.google.com/search?q=${encodeURIComponent(car.brand+' '+car.model+' Bil Magasinet test')}">📰 Bil Magasinet</a>
- </div>
- </div>`}).join('');
+function getUserProfile() {
+  return {
+    method: document.querySelector('input[name="method"]:checked')?.value || 'buy',
+    budget: Number(document.getElementById('budget')?.value || 0),
+    leaseBudget: Number(document.getElementById('leaseBudget')?.value || 0),
+    fuel: document.getElementById('fuel')?.value,
+    towNeed: document.getElementById('towNeed')?.value,
+    people: Number(document.getElementById('people')?.value || 1),
+    baggage: document.getElementById('baggage')?.value,
+    yearlyKm: Number(document.getElementById('yearlyKm')?.value || 0),
+    commute: Number(document.getElementById('commute')?.value || 0)
+  };
 }
 
-function addFavorite(name){
- if(!favorites.includes(name)){
-   favorites.push(name);
-   localStorage.setItem('favorites',JSON.stringify(favorites));
- }
- renderFavorites();
+function calculateMatch(car, user) {
+  let score = 0;
+  const reasons = [];
+
+  if (user.method === 'buy' && user.budget > 0) {
+    if (car.price <= user.budget) {
+      score += 40;
+      reasons.push('✅ Passer til dit budget');
+    }
+  }
+
+  if (user.method === 'lease' && user.leaseBudget > 0) {
+    if ((car.lease || 999999) <= user.leaseBudget) {
+      score += 40;
+      reasons.push('✅ Passer til dit leasingbudget');
+    }
+  }
+
+  if (car.fuel === user.fuel) {
+    score += 10;
+    reasons.push('✅ Matcher ønsket drivlinje');
+  }
+
+  if ((car.seats || 0) >= user.people) {
+    score += 15;
+    reasons.push('✅ Plads til familien');
+  }
+
+  if (user.baggage === 'høj' && (car.boot || 0) >= 500) {
+    score += 15;
+    reasons.push('✅ God bagageplads');
+  }
+
+  if (user.towNeed === 'campingvogn' && (car.tow || 0) >= 1200) {
+    score += 20;
+    reasons.push('✅ Kan trække campingvogn');
+  }
+
+  if (user.towNeed === 'trailer' && (car.tow || 0) >= 750) {
+    score += 10;
+    reasons.push('✅ Kan trække trailer');
+  }
+
+  return { score, reasons };
 }
 
-function renderFavorites(){
- const el=document.getElementById('favoritesList');
- if(el) el.innerHTML=favorites.length?favorites.join('<br>'):'Ingen favoritter endnu';
+function findCars() {
+  const user = getUserProfile();
+
+  const results = cars
+    .map(car => {
+      const match = calculateMatch(car, user);
+      return {
+        ...car,
+        matchScore: match.score,
+        reasons: match.reasons
+      };
+    })
+    .sort((a, b) => b.matchScore - a.matchScore)
+    .slice(0, 10);
+
+  renderResults(results);
 }
 
-function addCompare(name){
- if(compareList.length<4 && !compareList.includes(name)) compareList.push(name);
- const el=document.getElementById('compareList');
- if(el) el.innerHTML=compareList.join('<br>');
+function renderResults(results) {
+  const container = document.getElementById('resultsContainer');
+
+  container.innerHTML = results.map(car => `
+    <div class="result-card">
+      <h3>${car.brand} ${car.model}</h3>
+      <div class="score">${car.matchScore}% match</div>
+
+      <p>${car.reasons.join('<br>')}</p>
+
+      <p><strong>Pris:</strong> ${Number(car.price).toLocaleString('da-DK')} kr.</p>
+      <p><strong>Rækkevidde:</strong> ${car.range || '-'} km</p>
+      <p><strong>Træk:</strong> ${car.tow || '-'} kg</p>
+
+      <p>
+        <a target="_blank" href="${car.homepage}">Producent</a> |
+        <a target="_blank" href="https://www.google.com/search?q=${encodeURIComponent(car.brand + ' ' + car.model + ' FDM test')}">FDM Test</a> |
+        <a target="_blank" href="https://www.google.com/search?q=${encodeURIComponent(car.brand + ' ' + car.model + ' Bil Magasinet test')}">Bil Magasinet</a>
+      </p>
+    </div>
+  `).join('');
 }
 
-document.addEventListener('click',e=>{
- if(e.target.id==='darkModeBtn') document.body.classList.toggle('dark-mode');
-});
+document.getElementById('findCarBtn')?.addEventListener('click', findCars);

@@ -13,9 +13,7 @@ function renderResults(list){const el=document.getElementById('resultsContainer'
 href="https://www.google.com/search?q=${encodeURIComponent(car.brand + ' ' + car.model + ">Producent</a> |
         <a target="_blank" href="https://www.google.com/search?q=${encodeURIComponent(car.brand + ' ' + car.model + ' FDM test')}">FDM Test</a> |
         <a target="_blank" href="https://www.google.com/search?q=${encodeURIComponent(car.brand + ' ' + car.model + ' Bil Magasinet test')}">Bil Magasinet</a>
-      </p>
-  
-  </div>`).join('');}
+      </p></div>`).join('');}
 
 function findCars(){const user=getUser();const ranked=cars.filter(c=>hardFilter(c,user)).map(c=>{const s=scoreCar(c,user);return {...c,score:s.score,reasons:s.reasons};}).sort((a,b)=>b.score-a.score).slice(0,10);renderResults(ranked);}
 

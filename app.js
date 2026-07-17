@@ -1,12 +1,19 @@
 let cars = [];
+let carsLoaded = false;
 
-// SIKRER at data er loadet før brugeren kan søge
+// Loader bilerne fra cars.json
 async function loadCars() {
   try {
     const r = await fetch('cars.json');
     cars = await r.json();
+    carsLoaded = true;
+    console.log('Biler indlæst:', cars.length);
+    const btn = document.getElementById('findCarBtn');
+    if (btn) btn.disabled = false;
   } catch (err) {
     console.error("Kunne ikke hente cars.json", err);
+    const el = document.getElementById('resultsContainer');
+    if (el) el.innerHTML = '<p>Fejl: kunne ikke hente bildata.</p>';
   }
 }
 loadCars();
@@ -16,11 +23,12 @@ function getUser() {
     method: document.querySelector("input[name='method']:checked")?.value || 'buy',
     budget: Number(document.getElementById('budget')?.value || 0),
     leaseBudget: Number(document.getElementById('leaseBudget')?.value || 0),
-    fuel: document.getElementById('fuel')?.value || null,
+    fuel: document.getElementById('fuel')?.value || '',
     tow: document.getElementById('towNeed')?.value || 'ingen',
     people: Number(document.getElementById('people')?.value || 1),
     baggage: document.getElementById('baggage')?.value || 'mellem',
-    yearlyKm: Number(document.getElementById('yearlyKm')?.value || 0)
+    yearlyKm: Number(document.getElementById('yearlyKm')?.value || 0),
+    commute: Number(document.getElementById('commute')?.value || 0)
   };
 }
 
@@ -44,21 +52,55 @@ function hardFilter(car, user) {
 
 function scoreCar(car, user) {
   let score = 50;
-  let reasons = ['✅ Matcher dine krav'];
+  let reasons = ['✅ Matcher dine grundlæggende krav'];
 
+  // Rækkevidde vs. km/år
   if (car.range >= 500) {
-    score += 10;
+    score += 8;
     reasons.push('✅ God rækkevidde');
   }
-
-  if (car.boot >= 500) {
-    score += 10;
-    reasons.push('✅ God bagageplads');
+  if (user.yearlyKm > 30000 && car.range >= 550) {
+    score += 4;
+    reasons.push('✅ Velegnet til meget kørsel');
   }
 
-  if (car.tow >= 1200 && user.tow !== 'ingen') {
-    score += 10;
-    reasons.push('✅ Opfylder trækbehov');
+  // Bagagebehov
+  if (user.baggage === 'høj' && car.boot >= 550) {
+    score += 8;
+    reasons.push('✅ Stor bagageplads til familien');
+  } else if (user.baggage === 'mellem' && car.boot >= 450) {
+    score += 5;
+    reasons.push('✅ Passende bagageplads');
+  } else if (user.baggage === 'lav') {
+    reasons.push('ℹ️ Bagagebehov er lavt – flere biltyper er relevante');
+  }
+
+  // Trækbehov
+  if (user.tow !== 'ingen') {
+    if (user.tow === 'trailer' && car.tow >= 750) {
+      score += 6;
+      reasons.push('✅ Opfylder trailer-trækbehov');
+    }
+    if (user.tow === 'campingvogn' && car.tow >= 1200) {
+      score += 8;
+      reasons.push('✅ Opfylder campingvogn-trækbehov');
+    }
+  }
+
+  // Økonomi
+  if (user.method === 'buy' && user.budget > 0 && car.price <= user.budget) {
+    score += 6;
+    reasons.push('✅ Ligger inden for dit købsbudget');
+  }
+  if (user.method === 'lease' && user.leaseBudget > 0 && (car.lease ?? 999999) <= user.leaseBudget) {
+    score += 6;
+    reasons.push('✅ Ligger inden for dit leasingbudget');
+  }
+
+  // Familie
+  if (car.seats >= user.people) {
+    score += 4;
+    reasons.push('✅ Plads til familien');
   }
 
   return {
@@ -70,8 +112,10 @@ function scoreCar(car, user) {
 function renderResults(list) {
   const el = document.getElementById('resultsContainer');
 
+  if (!el) return;
+
   if (!list.length) {
-    el.innerHTML = `<p>Ingen biler matcher dine kriterier.</p>`;
+    el.innerHTML = `<p>Ingen biler matcher dine kriterier. Prøv at justere budget, drivlinje eller trækbehov.</p>`;
     return;
   }
 
@@ -101,6 +145,12 @@ function renderResults(list) {
 }
 
 function findCars() {
+  if (!carsLoaded) {
+    const el = document.getElementById('resultsContainer');
+    if (el) el.innerHTML = '<p>Vent et øjeblik – bilerne er ved at blive indlæst. Prøv igen om lidt.</p>';
+    return;
+  }
+
   const user = getUser();
 
   const ranked = cars

@@ -56,7 +56,13 @@ span{
  font-size:18px;
  cursor:pointer;
 }
-#findCarBtn:hover{opacity:.9}
+#findCarBtn:disabled{
+ opacity:0.6;
+ cursor:not-allowed;
+}
+#findCarBtn:hover:not(:disabled){
+ opacity:.9;
+}
 .result-card{
  border:1px solid var(--border);
  border-radius:12px;

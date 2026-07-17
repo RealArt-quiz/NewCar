@@ -93,7 +93,7 @@
 
 <!-- Find bil -->
 <section class="question-card center">
-    <button id="findCarBtn">
+    <button id="findCarBtn" disabled>
         🚗 Find min bil
     </button>
 </section>
@@ -115,7 +115,8 @@ document.getElementById('commute').addEventListener('input', e => {
 });
 
 document.getElementById('yearlyKm').addEventListener('input', e => {
-    document.getElementById('yearlyKmValue').textContent = Number(e.target.value).toLocaleString('da-DK') + ' km';
+    document.getElementById('yearlyKmValue').textContent =
+        Number(e.target.value).toLocaleString('da-DK') + ' km';
 });
 
 // Skift mellem køb og leasing

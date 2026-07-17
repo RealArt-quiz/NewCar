@@ -14,6 +14,7 @@
 
 <main class="container">
 
+<!-- Kørsel -->
 <section class="question-card">
     <h2>📍 Kørsel</h2>
 
@@ -26,6 +27,7 @@
     <span id="yearlyKmValue">20.000 km</span>
 </section>
 
+<!-- Økonomi -->
 <section class="question-card">
     <h2>💰 Økonomi</h2>
 
@@ -40,20 +42,22 @@
     </label>
 
     <div id="buySection">
-        <label>Budget (kr.)</label>
+        <label for="budget">Budget (kr.)</label>
         <input type="number" id="budget" placeholder="400000">
     </div>
 
-    <div id="leaseSection">
-        <label>Maks. leasing pr. måned</label>
+    <div id="leaseSection" style="display:none;">
+        <label for="leaseBudget">Maks. leasing pr. måned</label>
         <input type="number" id="leaseBudget" placeholder="5000">
     </div>
 </section>
 
+<!-- Drivlinje -->
 <section class="question-card">
     <h2>⚡ Drivlinje</h2>
 
     <select id="fuel">
+        <option value="">Ingen præference</option>
         <option value="Elbil">Elbil</option>
         <option value="Hybrid">Hybrid</option>
         <option value="Benzin">Benzin</option>
@@ -61,36 +65,40 @@
     </select>
 </section>
 
+<!-- Træk -->
 <section class="question-card">
     <h2>🚚 Trækbehov</h2>
 
     <select id="towNeed">
         <option value="ingen">Intet behov</option>
-        <option value="trailer">Trailer</option>
-        <option value="campingvogn">Campingvogn</option>
+        <option value="trailer">Trailer (750 kg)</option>
+        <option value="campingvogn">Campingvogn (1200 kg)</option>
     </select>
 </section>
 
+<!-- Familie -->
 <section class="question-card">
     <h2>👨‍👩‍👧‍👦 Familie</h2>
 
-    <label>Antal personer</label>
+    <label for="people">Antal personer</label>
     <input type="number" id="people" min="1" max="9" value="4">
 
-    <label>Bagagebehov</label>
+    <label for="baggage">Bagagebehov</label>
     <select id="baggage">
         <option value="lav">Lav</option>
-        <option value="mellem">Mellem</option>
+        <option value="mellem" selected>Mellem</option>
         <option value="høj">Høj</option>
     </select>
 </section>
 
+<!-- Find bil -->
 <section class="question-card center">
     <button id="findCarBtn">
         🚗 Find min bil
     </button>
 </section>
 
+<!-- Resultater -->
 <section class="results-card">
     <h2>🏆 Dine anbefalinger</h2>
     <div id="resultsContainer">
@@ -99,6 +107,26 @@
 </section>
 
 </main>
+
+<script>
+// Live opdatering af sliders
+document.getElementById('commute').addEventListener('input', e => {
+    document.getElementById('commuteValue').textContent = e.target.value + ' km';
+});
+
+document.getElementById('yearlyKm').addEventListener('input', e => {
+    document.getElementById('yearlyKmValue').textContent = Number(e.target.value).toLocaleString('da-DK') + ' km';
+});
+
+// Skift mellem køb og leasing
+document.querySelectorAll("input[name='method']").forEach(radio => {
+    radio.addEventListener('change', () => {
+        const method = document.querySelector("input[name='method']:checked").value;
+        document.getElementById('buySection').style.display = method === 'buy' ? 'block' : 'none';
+        document.getElementById('leaseSection').style.display = method === 'lease' ? 'block' : 'none';
+    });
+});
+</script>
 
 <script src="app.js"></script>
 </body>

@@ -6,13 +6,10 @@ async function loadCars() {
   const url = 'cars.json?v=' + Date.now(); // cache-buster
 
   try {
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    // VIGTIGT: Fjern headers – GitHub Pages kan ellers returnere HTML
+    const response = await fetch(url);
 
-    // Hvis serveren returnerer HTML eller en fejlside
+    // Læs rå tekst (kan være JSON eller HTML)
     const text = await response.text();
 
     // Debug: se hvad serveren faktisk sender
@@ -28,7 +25,7 @@ async function loadCars() {
     } catch (jsonErr) {
       console.error("JSON-fejl: Serveren returnerede ikke gyldig JSON:", jsonErr);
       document.getElementById('resultsContainer').innerHTML =
-        "<p>Fejl: Serveren returnerede ikke gyldig JSON.<br>Kontrollér at cars.json ligger i samme mappe som index.html.</p>";
+        "<p>Fejl: Serveren returnerede ikke gyldig JSON.<br>Kontrollér at cars.json ligger i samme mappe som index.html og indeholder gyldig JSON.</p>";
     }
 
   } catch (err) {

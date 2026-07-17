@@ -147,7 +147,9 @@ function renderResults(list) {
       <p><strong>Raekkevidde:</strong> ${car.range || '-'} km</p>
       <p><strong>Traek:</strong> ${car.tow || '-'} kg</p>
       <p>
-        <a target="_blank" href="${car.homepage || '#'}">Producent</a> |
+        <a target="_blank" 
+           
+           href="https://www.google.com/search?q=${encodeURIComponent(car.brand + ' ' + car.model + ">Producent</a> |
         <a target="_blank" href="https://www.google.com/search?q=${encodeURIComponent(car.brand + ' ' + car.model + ' FDM test')}">FDM Test</a> |
         <a target="_blank" href="https://www.google.com/search?q=${encodeURIComponent(car.brand + ' ' + car.model + ' Bil Magasinet test')}">Bil Magasinet</a>
       </p>

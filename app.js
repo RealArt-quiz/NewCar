@@ -9,7 +9,8 @@ function scoreCar(car,user){let score=50;let reasons=['✅ Matcher dine krav'];i
 
 function renderResults(list){const el=document.getElementById('resultsContainer');el.innerHTML=list.map(car=>`<div class="result-card"><h3>${car.brand} ${car.model}</h3><div class="score">${car.score}% match</div><p>${car.reasons.join('<br>')}</p><p><strong>Drivlinje:</strong> ${car.fuel||'-'}</p><p><strong>Biltype:</strong> ${car.body||'-'}</p><p><strong>Pris:</strong> ${Number(car.price).toLocaleString('da-DK')} kr</p><p><strong>Leasing:</strong> ${car.lease||'-'} kr/md</p><p><strong>Rækkevidde:</strong> ${car.range||'-'} km</p><p><strong>Sæder:</strong> ${car.seats||'-'}</p><p><strong>Bagagerum:</strong> ${car.boot||'-'} liter</p><p><strong>Trækkapacitet:</strong> ${car.tow||'-'} kg</p>
   
-  <p><a target="_blank" 
+  <p>
+    <a target="_blank" 
 href="https://www.google.com/search?q=${encodeURIComponent(car.brand + ' ' + car.model + ">Producent</a> |
         <a target="_blank" href="https://www.google.com/search?q=${encodeURIComponent(car.brand + ' ' + car.model + ' FDM test')}">FDM Test</a> |
         <a target="_blank" href="https://www.google.com/search?q=${encodeURIComponent(car.brand + ' ' + car.model + ' Bil Magasinet test')}">Bil Magasinet</a>

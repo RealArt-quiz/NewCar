@@ -1,21 +1,43 @@
 let cars = [];
 let carsLoaded = false;
 
-// Loader bilerne fra cars.json
+// Robust fetch der virker på ALLE hosting-platforme
 async function loadCars() {
+  const url = 'cars.json?v=' + Date.now(); // cache-buster
+
   try {
-    const r = await fetch('cars.json');
-    cars = await r.json();
-    carsLoaded = true;
-    console.log('Biler indlæst:', cars.length);
-    const btn = document.getElementById('findCarBtn');
-    if (btn) btn.disabled = false;
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    // Hvis serveren returnerer HTML eller en fejlside
+    const text = await response.text();
+
+    // Debug: se hvad serveren faktisk sender
+    console.log("Raw cars.json response:", text.slice(0, 200));
+
+    // Prøv at parse JSON
+    try {
+      cars = JSON.parse(text);
+      carsLoaded = true;
+      console.log("Biler indlæst:", cars.length);
+
+      document.getElementById('findCarBtn').disabled = false;
+    } catch (jsonErr) {
+      console.error("JSON-fejl: Serveren returnerede ikke gyldig JSON:", jsonErr);
+      document.getElementById('resultsContainer').innerHTML =
+        "<p>Fejl: Serveren returnerede ikke gyldig JSON.<br>Kontrollér at cars.json ligger i samme mappe som index.html.</p>";
+    }
+
   } catch (err) {
-    console.error("Kunne ikke hente cars.json", err);
-    const el = document.getElementById('resultsContainer');
-    if (el) el.innerHTML = '<p>Fejl: kunne ikke hente bildata.</p>';
+    console.error("Fetch-fejl:", err);
+    document.getElementById('resultsContainer').innerHTML =
+      "<p>Fejl: Kunne ikke hente cars.json.<br>Tjek filnavn, placering og hosting.</p>";
   }
 }
+
 loadCars();
 
 function getUser() {
@@ -54,7 +76,6 @@ function scoreCar(car, user) {
   let score = 50;
   let reasons = ['✅ Matcher dine grundlæggende krav'];
 
-  // Rækkevidde vs. km/år
   if (car.range >= 500) {
     score += 8;
     reasons.push('✅ God rækkevidde');
@@ -64,18 +85,14 @@ function scoreCar(car, user) {
     reasons.push('✅ Velegnet til meget kørsel');
   }
 
-  // Bagagebehov
   if (user.baggage === 'høj' && car.boot >= 550) {
     score += 8;
-    reasons.push('✅ Stor bagageplads til familien');
+    reasons.push('✅ Stor bagageplads');
   } else if (user.baggage === 'mellem' && car.boot >= 450) {
     score += 5;
     reasons.push('✅ Passende bagageplads');
-  } else if (user.baggage === 'lav') {
-    reasons.push('ℹ️ Bagagebehov er lavt – flere biltyper er relevante');
   }
 
-  // Trækbehov
   if (user.tow !== 'ingen') {
     if (user.tow === 'trailer' && car.tow >= 750) {
       score += 6;
@@ -87,7 +104,6 @@ function scoreCar(car, user) {
     }
   }
 
-  // Økonomi
   if (user.method === 'buy' && user.budget > 0 && car.price <= user.budget) {
     score += 6;
     reasons.push('✅ Ligger inden for dit købsbudget');
@@ -97,7 +113,6 @@ function scoreCar(car, user) {
     reasons.push('✅ Ligger inden for dit leasingbudget');
   }
 
-  // Familie
   if (car.seats >= user.people) {
     score += 4;
     reasons.push('✅ Plads til familien');
@@ -111,8 +126,6 @@ function scoreCar(car, user) {
 
 function renderResults(list) {
   const el = document.getElementById('resultsContainer');
-
-  if (!el) return;
 
   if (!list.length) {
     el.innerHTML = `<p>Ingen biler matcher dine kriterier. Prøv at justere budget, drivlinje eller trækbehov.</p>`;
@@ -146,8 +159,8 @@ function renderResults(list) {
 
 function findCars() {
   if (!carsLoaded) {
-    const el = document.getElementById('resultsContainer');
-    if (el) el.innerHTML = '<p>Vent et øjeblik – bilerne er ved at blive indlæst. Prøv igen om lidt.</p>';
+    document.getElementById('resultsContainer').innerHTML =
+      "<p>Vent et øjeblik – bilerne er ved at blive indlæst. Prøv igen om lidt.</p>";
     return;
   }
 

@@ -6,16 +6,11 @@ async function loadCars() {
   const url = 'cars.json?v=' + Date.now(); // cache-buster
 
   try {
-    // VIGTIGT: Fjern headers – GitHub Pages kan ellers returnere HTML
     const response = await fetch(url);
-
-    // Læs rå tekst (kan være JSON eller HTML)
     const text = await response.text();
 
-    // Debug: se hvad serveren faktisk sender
     console.log("Raw cars.json response:", text.slice(0, 200));
 
-    // Prøv at parse JSON
     try {
       cars = JSON.parse(text);
       carsLoaded = true;
@@ -23,15 +18,15 @@ async function loadCars() {
 
       document.getElementById('findCarBtn').disabled = false;
     } catch (jsonErr) {
-      console.error("JSON-fejl: Serveren returnerede ikke gyldig JSON:", jsonErr);
+      console.error("JSON-fejl:", jsonErr);
       document.getElementById('resultsContainer').innerHTML =
-        "<p>Fejl: Serveren returnerede ikke gyldig JSON.<br>Kontrollér at cars.json ligger i samme mappe som index.html og indeholder gyldig JSON.</p>";
+        "<p>Fejl: Serveren returnerede ikke gyldig JSON.</p>";
     }
 
   } catch (err) {
     console.error("Fetch-fejl:", err);
     document.getElementById('resultsContainer').innerHTML =
-      "<p>Fejl: Kunne ikke hente cars.json.<br>Tjek filnavn, placering og hosting.</p>";
+      "<p>Fejl: Kunne ikke hente cars.json.</p>";
   }
 }
 
@@ -47,9 +42,36 @@ function getUser() {
     people: Number(document.getElementById('people')?.value || 1),
     baggage: document.getElementById('baggage')?.value || 'mellem',
     yearlyKm: Number(document.getElementById('yearlyKm')?.value || 0),
-    commute: Number(document.getElementById('commute')?.value || 0)
+    commute: Number(document.getElementById('commute')?.value || 1),
+
+    // NY RANGE INPUT
+    minRange: Number(document.getElementById('minRange')?.value || 0),
+
+    kmPerCharge: Math.round(
+      (Number(document.getElementById('yearlyKm')?.value || 0) / 365) *
+      Number(document.getElementById('commute')?.value || 1)
+    )
   };
 }
+
+// Denne funktion kaldes fra HTML via event listeners
+// Den opdaterer kmPerCharge OG sætter minRange automatisk
+window.updateKmPerCharge = function () {
+  const yearlyKm = Number(document.getElementById('yearlyKm').value);
+  const commuteDays = Number(document.getElementById('commute').value);
+
+  const kmPerCharge = Math.round((yearlyKm / 365) * commuteDays);
+
+  document.getElementById('kmPerChargeValue').textContent =
+    kmPerCharge.toLocaleString('da-DK') + ' km';
+
+  // AUTO-OPDATER minRange, men brugeren kan stadig ændre manuelt bagefter
+  const minRangeInput = document.getElementById('minRange');
+  const minRangeValue = document.getElementById('minRangeValue');
+
+  minRangeInput.value = kmPerCharge;
+  minRangeValue.textContent = kmPerCharge + ' km';
+};
 
 function hardFilter(car, user) {
   if (user.method === 'buy' && user.budget > 0 && car.price > user.budget) return false;
@@ -65,6 +87,9 @@ function hardFilter(car, user) {
 
   if (user.tow === 'campingvogn' && (car.tow || 0) < 1200) return false;
   if (user.tow === 'trailer' && (car.tow || 0) < 750) return false;
+
+  // Minimum rækkevidde
+  if (user.minRange > 0 && car.range < user.minRange) return false;
 
   return true;
 }
@@ -163,14 +188,19 @@ function findCars() {
 
   const user = getUser();
 
-  const ranked = cars
-    .filter(c => hardFilter(c, user))
+  // 1) Filtrer først på hårde krav
+  let filtered = cars.filter(c => hardFilter(c, user));
+
+  // 2) Sortér de filtrerede biler efter pris (billigste først)
+  filtered.sort((a, b) => a.price - b.price);
+
+  // 3) Beregn score EFTER pris-sortering
+  const ranked = filtered
     .map(c => {
       const s = scoreCar(c, user);
       return { ...c, score: s.score, reasons: s.reasons };
     })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 10);
+    .slice(0, 10); // behold kun de 10 billigste der matcher
 
   renderResults(ranked);
 }

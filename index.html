@@ -16,7 +16,7 @@
 
 <!-- Kørsel -->
 <section class="question-card">
-    <h2>📍 Kørselsbehov beregner</h2>
+    <h2>📍 Kørsel</h2>
 
     <label for="commute">Dage mellem tankning / opladning</label>
     <input type="range" id="commute" min="1" max="14" value="7">
@@ -32,11 +32,11 @@
 
 <!-- Minimum rækkevidde -->
 <section class="question-card">
-    <h2>📏 Vælg acceptabel rækkevidde</h2>
+    <h2>📏 Minimum rækkevidde</h2>
 
     <label for="minRange">Rækkevidde (km)</label>
-    <input type="range" id="minRange" min="1" max="1200" value="kmPerChargeValue">
-    <span id="minRangeValue">200 km</span>
+    <input type="range" id="minRange" min="1" max="1200" value="300">
+    <span id="minRangeValue">300 km</span>
 </section>
 
 <!-- Økonomi -->
@@ -54,8 +54,11 @@
     </label>
 
     <div id="buySection">
-        <label for="budget">Budget (kr.)</label>
-        <input type="number" id="budget" placeholder="400000">
+        <label for="minPrice">Laveste pris (kr.)</label>
+        <input type="number" id="minPrice" placeholder="0">
+
+        <label for="maxPrice">Højeste pris (kr.)</label>
+        <input type="number" id="maxPrice" placeholder="400000">
     </div>
 
     <div id="leaseSection" style="display:none;">
@@ -137,7 +140,7 @@ document.getElementById('minRange').addEventListener('input', e => {
     document.getElementById('minRangeValue').textContent = e.target.value + ' km';
 });
 
-// Beregning: km pr. opladning/tankning
+// Beregning: km pr. opladning/tankning + auto-range
 function updateKmPerCharge() {
     const yearlyKm = Number(document.getElementById('yearlyKm').value);
     const commuteDays = Number(document.getElementById('commute').value);
@@ -146,6 +149,13 @@ function updateKmPerCharge() {
 
     document.getElementById('kmPerChargeValue').textContent =
         kmPerCharge.toLocaleString('da-DK') + ' km';
+
+    // Auto-udfyld minRange
+    const minRangeInput = document.getElementById('minRange');
+    const minRangeValue = document.getElementById('minRangeValue');
+
+    minRangeInput.value = kmPerCharge;
+    minRangeValue.textContent = kmPerCharge + ' km';
 }
 updateKmPerCharge();
 

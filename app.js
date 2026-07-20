@@ -35,16 +35,21 @@ loadCars();
 function getUser() {
   return {
     method: document.querySelector("input[name='method']:checked")?.value || 'buy',
-    budget: Number(document.getElementById('budget')?.value || 0),
+
+    // Prisinterval
+    minPrice: Number(document.getElementById('minPrice')?.value || 0),
+    maxPrice: Number(document.getElementById('maxPrice')?.value || 9999999),
+
     leaseBudget: Number(document.getElementById('leaseBudget')?.value || 0),
+
     fuel: document.getElementById('fuel')?.value || '',
     tow: document.getElementById('towNeed')?.value || 'ingen',
     people: Number(document.getElementById('people')?.value || 1),
     baggage: document.getElementById('baggage')?.value || 'mellem',
+
     yearlyKm: Number(document.getElementById('yearlyKm')?.value || 0),
     commute: Number(document.getElementById('commute')?.value || 1),
 
-    // NY RANGE INPUT
     minRange: Number(document.getElementById('minRange')?.value || 0),
 
     kmPerCharge: Math.round(
@@ -54,37 +59,27 @@ function getUser() {
   };
 }
 
-// Denne funktion kaldes fra HTML via event listeners
-// Den opdaterer kmPerCharge OG sætter minRange automatisk
-window.updateKmPerCharge = function () {
-  const yearlyKm = Number(document.getElementById('yearlyKm').value);
-  const commuteDays = Number(document.getElementById('commute').value);
-
-  const kmPerCharge = Math.round((yearlyKm / 365) * commuteDays);
-
-  document.getElementById('kmPerChargeValue').textContent =
-    kmPerCharge.toLocaleString('da-DK') + ' km';
-
-  // AUTO-OPDATER minRange, men brugeren kan stadig ændre manuelt bagefter
-  const minRangeInput = document.getElementById('minRange');
-  const minRangeValue = document.getElementById('minRangeValue');
-
-  minRangeInput.value = kmPerCharge;
-  minRangeValue.textContent = kmPerCharge + ' km';
-};
-
 function hardFilter(car, user) {
-  if (user.method === 'buy' && user.budget > 0 && car.price > user.budget) return false;
 
+  // Prisinterval for køb
+  if (user.method === 'buy') {
+    if (car.price < user.minPrice) return false;
+    if (car.price > user.maxPrice) return false;
+  }
+
+  // Leasing
   if (user.method === 'lease' && user.leaseBudget > 0) {
     const leasePrice = car.lease ?? 999999;
     if (leasePrice > user.leaseBudget) return false;
   }
 
+  // Drivlinje
   if (user.fuel && car.fuel !== user.fuel) return false;
 
+  // Sæder
   if ((car.seats || 0) < user.people) return false;
 
+  // Træk
   if (user.tow === 'campingvogn' && (car.tow || 0) < 1200) return false;
   if (user.tow === 'trailer' && (car.tow || 0) < 750) return false;
 
@@ -126,15 +121,6 @@ function scoreCar(car, user) {
     }
   }
 
-  if (user.method === 'buy' && user.budget > 0 && car.price <= user.budget) {
-    score += 6;
-    reasons.push('✅ Ligger inden for dit købsbudget');
-  }
-  if (user.method === 'lease' && user.leaseBudget > 0 && (car.lease ?? 999999) <= user.leaseBudget) {
-    score += 6;
-    reasons.push('✅ Ligger inden for dit leasingbudget');
-  }
-
   if (car.seats >= user.people) {
     score += 4;
     reasons.push('✅ Plads til familien');
@@ -150,7 +136,7 @@ function renderResults(list) {
   const el = document.getElementById('resultsContainer');
 
   if (!list.length) {
-    el.innerHTML = `<p>Ingen biler matcher dine kriterier. Prøv at justere budget, drivlinje eller trækbehov.</p>`;
+    el.innerHTML = `<p>Ingen biler matcher dine kriterier. Prøv at justere pris, rækkevidde eller trækbehov.</p>`;
     return;
   }
 
